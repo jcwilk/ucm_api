@@ -1,6 +1,7 @@
 // mod.ts
 import { Application } from "./deps.ts";
 import { versionRouter } from "./routes/version.ts";
+import { compileRouter } from "./routes/compile.ts";
 import { responseTime } from "./middlewares/responseTime.ts";
 
 const app = new Application();
@@ -16,9 +17,10 @@ app.use(async (context, next) => {
 // Response time middleware
 app.use(responseTime);
 
-// Use version router - TODO, inline a more concise utility for chaining routers as needed
-app.use(versionRouter.routes());
-app.use(versionRouter.allowedMethods());
+[versionRouter, compileRouter].forEach((router) => {
+  app.use(router.routes());
+  app.use(router.allowedMethods());
+});
 
 // Starting the server
 console.log(`Server running on http://localhost:${port}/`);

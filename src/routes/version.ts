@@ -1,4 +1,3 @@
-// routes/version.ts
 import { Router } from "../deps.ts";
 
 async function ucmVersionOutput(): Promise<string> {

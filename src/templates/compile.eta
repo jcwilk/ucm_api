@@ -1,0 +1,11 @@
+```ucm:hide
+.> builtins.merge
+```
+
+```unison
+<%= it.code %>
+```
+
+```ucm
+.> add
+```

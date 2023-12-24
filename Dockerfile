@@ -12,6 +12,8 @@ RUN mkdir -p ./bin && \
     tar -xzf ucm-linux.tar.gz -C ./bin && \
     rm ucm-linux.tar.gz
 
+RUN mkdir -p ./templates
+
 # Copy and cache dependencies
 COPY src/deps.ts ./src/
 RUN deno cache src/deps.ts
@@ -23,4 +25,4 @@ COPY src/ ./src/
 RUN deno cache src/mod.ts
 
 # Run the application
-CMD ["run", "--allow-net", "--allow-env", "--allow-read", "--allow-run", "src/mod.ts"]
+CMD ["run", "--allow-net", "--allow-env", "--allow-read", "--allow-write", "--allow-run", "src/mod.ts"]
