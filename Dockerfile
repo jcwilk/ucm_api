@@ -15,6 +15,7 @@ RUN mkdir -p ./bin && \
 RUN mkdir -p ./templates
 
 # Copy and cache dependencies
+COPY src/deps/ ./src/deps/
 COPY src/deps.ts ./src/
 RUN deno cache src/deps.ts
 
