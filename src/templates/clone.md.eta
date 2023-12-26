@@ -1,0 +1,3 @@
+```ucm
+.> clone <%= it.project %>
+```

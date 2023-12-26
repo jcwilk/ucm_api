@@ -19,8 +19,6 @@ RUN mkdir -p ./bin && \
     tar -xzf ucm-linux.tar.gz -C ./bin && \
     rm ucm-linux.tar.gz
 
-RUN mkdir -p ./templates
-
 RUN mkdir -p /root/.local/share/unisonlanguage
 
 # Copy and cache dependencies
@@ -30,6 +28,12 @@ RUN deno cache src/deps.ts
 
 # Copy the rest of the application files
 COPY src/ ./src/
+
+# Create a directory for codebases
+RUN mkdir -p ./codebases
+
+# Create a directory for transcripts
+RUN mkdir -p ./transcripts
 
 # Cache the main module file
 RUN deno cache src/mod.ts

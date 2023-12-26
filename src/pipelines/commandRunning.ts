@@ -1,4 +1,5 @@
-import { BehaviorSubject, OperatorFunction, Subject, concatMap, filter, finalize, first, map } from "../deps/rxjs.ts";
+import { BehaviorSubject, OperatorFunction, Subject, concatMap, filter, finalize, first, from, map, mergeMap, of, tap } from "../deps/rxjs.ts";
+import { RenderedTranscript } from "../utils/templateRendering.ts";
 
 export type UcmCommand = {
   args: string[],
@@ -19,6 +20,11 @@ type TrackedCommand = {
 type TrackedCommandResult = {
   id: string,
   result: UcmCommandResult,
+}
+
+export type TranscriptOutput = {
+  output: string,
+  error?: string,
 }
 
 // Create a subject to act as the central stream of events
@@ -66,6 +72,34 @@ export function commandToResult(): OperatorFunction<UcmCommand, UcmCommandResult
 
     return tempSubject.pipe(
       filter(Boolean),
+    );
+  });
+}
+
+function commandResultToOutput(): OperatorFunction<UcmCommandResult, TranscriptOutput> {
+  return mergeMap((result: UcmCommandResult) => {
+    const match = result.stdout.match(/💾\s+Wrote\s+(\/\S+)/);
+    if (match && match[1]) {
+      return from(Deno.readTextFile(match[1])).pipe(
+        tap(() => Deno.remove(match[1])),
+        map<string, TranscriptOutput>((output: string) => ({ output }))
+      );
+    }
+
+    return of({output: "", error: `Unable to detect output file!\n\nexit code: ${result.code}\n\nstderr: ${result.stderr}\n\nstdout: ${result.stdout}`})
+  });
+}
+
+export function transcriptToOutput(argsFromTranscriptPath: (transcriptPath: string) => string[]): OperatorFunction<RenderedTranscript, TranscriptOutput> {
+  return mergeMap((interpolatedCode: RenderedTranscript) => {
+    const transcriptPath = `transcripts/template_${crypto.randomUUID()}.md`;
+    const writePromise = Deno.writeTextFile(transcriptPath, interpolatedCode.transcript);
+
+    return from(writePromise).pipe(
+      map<void, UcmCommand>(() => ({ args: argsFromTranscriptPath(transcriptPath) })),
+      commandToResult(),
+      tap(() => Deno.remove(transcriptPath)),
+      commandResultToOutput(),
     );
   });
 }

@@ -1,16 +1,6 @@
-import { Eta } from "../deps.ts";
-import { of, map, Observable, OperatorFunction, from, mergeMap, tap } from "../deps/rxjs.ts";
-import { UcmCommand, UcmCommandResult, commandToResult } from "./commandRunning.ts";
-
-type InterpolatedCode = {
-  code: string,
-  transcript: string,
-}
-
-type TranscriptOutput = {
-  output: string,
-  error?: string,
-}
+import { of, map, Observable, OperatorFunction } from "../deps/rxjs.ts";
+import { renderTranscriptTemplate } from "../utils/templateRendering.ts";
+import { TranscriptOutput, transcriptToOutput } from "./commandRunning.ts";
 
 type CompiledTerm = {
   name: string,
@@ -29,47 +19,7 @@ type CompilationResult = {
   errors: string[]
 }
 
-function interpolateCode(template: string): OperatorFunction<string, InterpolatedCode> {
-  return map((code: string) => {
-    const data = { code };
-
-    const eta = new Eta({ autoEscape: false, views: Deno.cwd()+'/src/templates/' })
-
-    const transcript = eta.render(template, data);
-
-    return { transcript, code };
-  });
-}
-
-function commandResultToOutput(): OperatorFunction<UcmCommandResult, TranscriptOutput> {
-  return mergeMap((result: UcmCommandResult) => {
-    const match = result.stdout.match(/💾\s+Wrote\s+(\/\S+)/);
-    if (match && match[1]) {
-      return from(Deno.readTextFile(match[1])).pipe(
-        tap(() => Deno.remove(match[1])),
-        map<string, TranscriptOutput>((output: string) => ({ output }))
-      );
-    }
-
-    return of({output: "", error: `Unable to detect output file!\n\nexit code: ${result.code}\n\nstderr: ${result.stderr}\n\nstdout: ${result.stdout}`})
-  });
-}
-
-function transcriptToOutput(): OperatorFunction<InterpolatedCode, TranscriptOutput> {
-  return mergeMap((interpolatedCode: InterpolatedCode) => {
-    const transcriptPath = `templates/template_${crypto.randomUUID()}.md`;
-    const writePromise = Deno.writeTextFile(transcriptPath, interpolatedCode.transcript);
-
-    return from(writePromise).pipe(
-      map<void, UcmCommand>(() => ({ args: ["transcript", transcriptPath] })),
-      commandToResult(),
-      tap(() => Deno.remove(transcriptPath)),
-      commandResultToOutput(),
-    );
-  });
-}
-
-function parseTranscriptOutput(code: string): OperatorFunction<TranscriptOutput, CompilationResult> {
+function parseCompilationTranscriptOutput(code: string): OperatorFunction<TranscriptOutput, CompilationResult> {
   return map((transcriptOutput: TranscriptOutput) => {
     const { output, error: transcriptError } = transcriptOutput;
 
@@ -120,14 +70,13 @@ function parseTranscriptOutput(code: string): OperatorFunction<TranscriptOutput,
 }
 
 export function compileCode(code: string): Observable<CompilationResult> {
-  return of(code).pipe(
-    // interpolate code into a template and return the string
-    interpolateCode("compile"),
+  const transcript = renderTranscriptTemplate("compile.md", { code });
 
+  return of(transcript).pipe(
     // run the transcript command on the string and return the output file contents, removing both files in the process
-    transcriptToOutput(),
+    transcriptToOutput(transcriptPath => ["transcript", transcriptPath]),
 
     // parse the output file contents and return the result
-    parseTranscriptOutput(code),
+    parseCompilationTranscriptOutput(code),
   )
 }
