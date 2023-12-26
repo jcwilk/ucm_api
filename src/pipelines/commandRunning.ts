@@ -45,7 +45,6 @@ const eventPipeline: Observable<TrackedCommandResult> = eventSubject.pipe(
   })
 );
 
-
 export function commandToResult(): OperatorFunction<UcmCommand, UcmCommandResult> {
   return concatMap((command: UcmCommand) => {
     const id = crypto.randomUUID();

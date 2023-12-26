@@ -43,19 +43,15 @@ function interpolateCode(template: string): OperatorFunction<string, Interpolate
 
 function commandResultToOutput(): OperatorFunction<UcmCommandResult, TranscriptOutput> {
   return mergeMap((result: UcmCommandResult) => {
-    let error = result.stderr;
-    if (result.code === 0) {
-      const match = result.stdout.match(/💾\s+Wrote\s+(\/\S+)/);
-      if (match && match[1]) {
-        return from(Deno.readTextFile(match[1])).pipe(
-          tap(() => Deno.remove(match[1])),
-          map<string, TranscriptOutput>((output: string) => ({ output }))
-        );
-      }
-      error = "Output file path not found in transcript command output: " + JSON.stringify(result.stdout);
+    const match = result.stdout.match(/💾\s+Wrote\s+(\/\S+)/);
+    if (match && match[1]) {
+      return from(Deno.readTextFile(match[1])).pipe(
+        tap(() => Deno.remove(match[1])),
+        map<string, TranscriptOutput>((output: string) => ({ output }))
+      );
     }
 
-    return of({ error, output: "" } as TranscriptOutput);
+    return of({output: "", error: `Unable to detect output file!\n\nexit code: ${result.code}\n\nstderr: ${result.stderr}\n\nstdout: ${result.stdout}`})
   });
 }
 
