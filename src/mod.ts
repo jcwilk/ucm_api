@@ -1,11 +1,13 @@
-// mod.ts
 import { Application } from "./deps.ts";
 import { versionRouter } from "./routes/version.ts";
 import { compileRouter } from "./routes/compile.ts";
 import { responseTime } from "./middlewares/responseTime.ts";
+import { authenticate } from "./middlewares/authentication.ts";
 
 const app = new Application();
 const port = 8000;
+
+app.use(authenticate);
 
 // A simple logger to show the method and URL of each request
 app.use(async (context, next) => {
@@ -14,7 +16,6 @@ app.use(async (context, next) => {
   console.log(`${context.request.method} ${context.request.url} - ${rt}`);
 });
 
-// Response time middleware
 app.use(responseTime);
 
 [versionRouter, compileRouter].forEach((router) => {
