@@ -3,7 +3,7 @@ import { renderTranscriptTemplate } from "../utils/templateRendering.ts";
 import { TranscriptOutput, transcriptToOutput } from "./commandRunning.ts";
 
 export function cloneProject(project: string): Observable<TranscriptOutput> {
-  const transcript = renderTranscriptTemplate("clone.md", { project });
+  const transcript = renderTranscriptTemplate("clone.md.eta", { project });
 
   return of(transcript).pipe(
     // run the transcript command on the string and return the output file contents, removing both files in the process

@@ -70,7 +70,7 @@ function parseCompilationTranscriptOutput(code: string): OperatorFunction<Transc
 }
 
 export function compileCode(code: string): Observable<CompilationResult> {
-  const transcript = renderTranscriptTemplate("compile.md", { code });
+  const transcript = renderTranscriptTemplate("compile.md.eta", { code });
 
   return of(transcript).pipe(
     // run the transcript command on the string and return the output file contents, removing both files in the process
