@@ -1,4 +1,4 @@
-import { BehaviorSubject, Observable, OperatorFunction, Subject, concatMap, filter, finalize, first, map } from "../deps/rxjs.ts";
+import { BehaviorSubject, OperatorFunction, Subject, concatMap, filter, finalize, first, map } from "../deps/rxjs.ts";
 
 export type UcmCommand = {
   args: string[],
@@ -22,10 +22,11 @@ type TrackedCommandResult = {
 }
 
 // Create a subject to act as the central stream of events
-const eventSubject = new Subject<TrackedCommand>();
+const inputLock = new Subject<TrackedCommand>();
+const outputLock = new Subject<TrackedCommandResult>();
 
 // Define the pipeline with concatMap to ensure sequential processing
-const eventPipeline: Observable<TrackedCommandResult> = eventSubject.pipe(
+inputLock.pipe(
   concatMap(async (event) => {
     const command = new Deno.Command("bin/ucm", {
       args: event.command.args,
@@ -43,21 +44,25 @@ const eventPipeline: Observable<TrackedCommandResult> = eventSubject.pipe(
       }
     };
   })
-);
+).subscribe(outputLock);
 
 export function commandToResult(): OperatorFunction<UcmCommand, UcmCommandResult> {
   return concatMap((command: UcmCommand) => {
     const id = crypto.randomUUID();
     const tempSubject = new BehaviorSubject<UcmCommandResult | null>(null);
+    // TODO: differentiate between commands which can be parallelized and those which cannot
+    // for now, we're treating all UCM commands as if they cannot be parallelized...
+    // but commands which neither read from a shared codebase nor write to one could be parallelized,
+    // eg strictly compiling to check for errors
 
-    eventPipeline.pipe(
+    outputLock.pipe(
       filter((result: TrackedCommandResult) => result.id === id),
       map((result: TrackedCommandResult) => result.result),
       first(),
       finalize(() => tempSubject.complete()),
     ).subscribe(tempSubject);
 
-    eventSubject.next({ id, command });
+    inputLock.next({ id, command });
 
     return tempSubject.pipe(
       filter(Boolean),
