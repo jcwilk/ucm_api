@@ -5,6 +5,8 @@ import { responseTime } from "./middlewares/responseTime.ts";
 import { authenticate } from "./middlewares/authentication.ts";
 import { cloneProject } from "./pipelines/cloning.ts";
 import { firstValueFrom } from "./deps/rxjs.ts";
+import { cors } from "./middlewares/cors.ts";
+import { pushRouter } from "./routes/push.ts";
 
 // TODO: put this project clone stuff somewhere else
 const project = Deno.env.get("PROJECT");
@@ -23,6 +25,8 @@ if (cloneOutput.error && cloneOutput.error.length > 0) {
 const app = new Application();
 const port = 8000;
 
+app.use(cors);
+
 app.use(authenticate);
 
 // A simple logger to show the method and URL of each request
@@ -34,7 +38,7 @@ app.use(async (context, next) => {
 
 app.use(responseTime);
 
-[versionRouter, compileRouter].forEach((router) => {
+[versionRouter, compileRouter, pushRouter].forEach((router) => {
   app.use(router.routes());
   app.use(router.allowedMethods());
 });

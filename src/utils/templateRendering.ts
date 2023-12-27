@@ -7,7 +7,7 @@ export type RenderedTranscript = {
 }
 
 export function renderTranscriptTemplate(templateName: string, data: Record<string, string>) {
-  const eta = new Eta({ autoEscape: false, views: Deno.cwd()+'/src/templates/' })
+  const eta = new Eta({ autoEscape: false, rmWhitespace: false, autoTrim: false, views: Deno.cwd()+'/src/templates/' })
 
   return {
     transcript: eta.render(templateName, data),

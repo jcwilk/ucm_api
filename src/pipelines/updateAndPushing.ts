@@ -8,13 +8,13 @@ type PushResult = {
 }
 
 export function updateAndPushCode(code: string): Observable<PushResult> {
-  const transcript = renderTranscriptTemplate("updateAndPush.md.eta", { code });
+  const transcript = renderTranscriptTemplate("updateAndPush.md.eta", { code, project: Deno.env.get("PROJECT") || "" });
 
   return of(transcript).pipe(
     // run the transcript command on the string and return the output file contents, removing both files in the process
-    transcriptToOutput(transcriptPath => ["transcript.forked", "-Ccodebases/temp", "-Scodebases/temp", transcriptPath]),
+    transcriptToOutput(transcriptPath => ["transcript.fork", "-Ccodebases/temp", "-Scodebases/temp", transcriptPath]),
 
     // parse the output file contents and return the result
-    map((transcriptOutput: TranscriptOutput) => ({ code, transcriptOutput})),
+    map((transcriptOutput: TranscriptOutput) => ({ code, transcriptOutput })),
   )
 }

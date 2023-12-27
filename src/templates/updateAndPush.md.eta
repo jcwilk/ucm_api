@@ -3,9 +3,9 @@
 ```
 
 ```ucm
-.> update
+<%= it.project %>/main> update
 ```
 
-```
-.> push
+```ucm
+<%= it.project %>/main> push
 ```
