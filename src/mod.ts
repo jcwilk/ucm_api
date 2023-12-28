@@ -7,6 +7,8 @@ import { cloneProject } from "./pipelines/cloning.ts";
 import { firstValueFrom } from "./deps/rxjs.ts";
 import { cors } from "./middlewares/cors.ts";
 import { pushRouter } from "./routes/push.ts";
+import { errorHandler } from "./middlewares/errorHandler.ts";
+import { deleteRouter } from "./routes/delete.ts";
 
 // TODO: put this project clone stuff somewhere else
 const project = Deno.env.get("PROJECT");
@@ -25,6 +27,8 @@ if (cloneOutput.error && cloneOutput.error.length > 0) {
 const app = new Application();
 const port = 8000;
 
+app.use(errorHandler);
+
 app.use(cors);
 
 app.use(authenticate);
@@ -38,7 +42,7 @@ app.use(async (context, next) => {
 
 app.use(responseTime);
 
-[versionRouter, compileRouter, pushRouter].forEach((router) => {
+[versionRouter, compileRouter, pushRouter, deleteRouter].forEach((router) => {
   app.use(router.routes());
   app.use(router.allowedMethods());
 });

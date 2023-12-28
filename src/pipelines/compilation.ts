@@ -73,10 +73,8 @@ export function compileCode(code: string): Observable<CompilationResult> {
   const transcript = renderTranscriptTemplate("compile.md.eta", { code });
 
   return of(transcript).pipe(
-    // run the transcript command on the string and return the output file contents, removing both files in the process
     transcriptToOutput(transcriptPath => ["transcript", transcriptPath]),
 
-    // parse the output file contents and return the result
     parseCompilationTranscriptOutput(code),
   )
 }

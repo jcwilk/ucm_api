@@ -1,0 +1,7 @@
+```ucm
+<%= it.project %>/main> delete.<%= it.isType ? "type" : "term" %> <%= it.definitionName %>
+```
+
+```ucm
+<%= it.project %>/main> push
+```
