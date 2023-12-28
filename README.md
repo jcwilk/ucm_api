@@ -35,7 +35,7 @@ get out of sync, but it wouldn't be terribly difficult to add support for detect
 * **Middleware Integration**: Includes authentication, CORS, error handling, and response time tracking.
 * **Dynamic Script Execution**: Execute scripts and manage Unison codebases with custom pipelines.
 * **Template Rendering**: Utilize Eta template engine for generating dynamic scripts.
-* **Stateless API Routes**: Dedicated one-shot routes for compiling, deleting, pushing, and version management.
+* **Stateless API Routes**: Dedicated one-shot routes for type-checking, updating and deleting.
 
 ## How to Run
 
