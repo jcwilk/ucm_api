@@ -12,7 +12,21 @@
   <a href="#api-endpoints">API Endpoints</a>
 </p>
 
-Disclaimer: This project is in no way affiliated with Unison Computing.
+Disclaimer: This project is in no way affiliated with the Unison Computing company.
+
+This API fills in the gap of how to get a string of code compiled and uploaded to Unison Share programmatically.
+
+Currently the only officially supported method of doing so is via direct human interaction with the UCM CLI utility
+which is a somewhat heavyweight executable dependant on a number of libraries to compile and upload new definitions
+to a project in Unison Share. The docker container defined in the Dockerfile first downloads and extracts the executable
+then sets up the credentials.json to connect to your Unison Share account.
+
+To sidestep the need for direct human interaction or CLI puppeteering, It builds transcripts on-the-fly from templates
+with the param-passed code interpolated in before running and discarding the the transcript with the results returned
+in the response. All API interactions are designed to be stateless, keeping only a mirrored copy of the project locally.
+
+There's a current limitation that you must not intervene with the project being managed by the server otherwise it will
+get out of sync, but it wouldn't be terribly difficult to add support for detecting and fixing the state of being out-of-sync.
 
 ## Key Features
 
@@ -21,7 +35,7 @@ Disclaimer: This project is in no way affiliated with Unison Computing.
 * **Middleware Integration**: Includes authentication, CORS, error handling, and response time tracking.
 * **Dynamic Script Execution**: Execute scripts and manage Unison codebases with custom pipelines.
 * **Template Rendering**: Utilize Eta template engine for generating dynamic scripts.
-* **Comprehensive API Routes**: Dedicated routes for compiling, deleting, pushing, and version management.
+* **Stateless API Routes**: Dedicated one-shot routes for compiling, deleting, pushing, and version management.
 
 ## How to Run
 
