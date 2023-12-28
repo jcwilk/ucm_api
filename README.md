@@ -4,7 +4,7 @@
   <br>
 </h1>
 
-<h4 align="center">A Deno-based API for managing and interacting with Unison Share via direct UCM transcript invocations.</h4>
+<h4 align="center">A Deno-based API for managing Unison Share projects via templated UCM transcripts.</h4>
 
 <p align="center">
   <a href="#key-features">Key Features</a> •
