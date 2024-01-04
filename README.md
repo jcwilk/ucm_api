@@ -60,12 +60,12 @@ API via http://localhost:8000/. You may need to reference the contents of the sc
 The API was designed to run on Back4App for free, but it will likely work on any container-as-a-service like digital ocean, etc.
 
 ##  API Endpoints
-
+```
 /version: Get the current version of the Unison Codebase Manager.
 /compile: Compile temporary code against the generic base library to check for type errors.
 /delete: Delete type or term definitions from the project and push changes.
 /push: Update and push new terms and/or types to the project and push changes.
-
+```
 ## Contributing
 
 Contributions are welcome, although be aware it's a new project under active development. Contact me at me@jcwilk.com if you're
