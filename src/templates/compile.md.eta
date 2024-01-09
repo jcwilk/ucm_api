@@ -1,11 +1,7 @@
-```ucm:hide
-.> builtins.merge
-```
-
 ```unison
 <%= it.code %>
 ```
 
 ```ucm
-.> add
+<%= it.project %>/main> update
 ```

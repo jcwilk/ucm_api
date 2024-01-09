@@ -41,7 +41,7 @@ function parseCompilationTranscriptOutput(code: string): OperatorFunction<Transc
       errors.push(lines.slice(errorIndex + 1).join('\n'));
     } else {
       // Process as successful compilation output
-      const definitionsStartIndex = lines.findIndex(line => line.includes("⍟ I've added these definitions:"));
+      const definitionsStartIndex = lines.findIndex(line => line.includes("⍟ These new definitions are ok to `add`:"));
 
       if (definitionsStartIndex !== -1) {
         // Iterate over each line after the definitions start
@@ -70,10 +70,10 @@ function parseCompilationTranscriptOutput(code: string): OperatorFunction<Transc
 }
 
 export function compileCode(code: string): Observable<CompilationResult> {
-  const transcript = renderTranscriptTemplate("compile.md.eta", { code });
+  const transcript = renderTranscriptTemplate("compile.md.eta", { code, project: Deno.env.get("PROJECT") || "" });
 
   return of(transcript).pipe(
-    transcriptToOutput(transcriptPath => ["transcript", transcriptPath]),
+    transcriptToOutput(transcriptPath => ["transcript.fork", "-Ccodebases/temp", transcriptPath]),
 
     parseCompilationTranscriptOutput(code),
   )
